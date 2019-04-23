@@ -23,29 +23,29 @@ import "time"
 
 type Smalltime int64
 
-const bitshift_year = 46
-const bitshift_month = 42
-const bitshift_day = 37
-const bitshift_hour = 32
-const bitshift_minute = 26
-const bitshift_second = 20
+const bitshiftYear = 46
+const bitshiftMonth = 42
+const bitshiftDay = 37
+const bitshiftHour = 32
+const bitshiftMinute = 26
+const bitshiftSecond = 20
 
-const mask_year = uint64(0x3ffff) << bitshift_year
-const mask_month = Smalltime(0xf) << bitshift_month
-const mask_day = Smalltime(0x1f) << bitshift_day
-const mask_hour = Smalltime(0x1f) << bitshift_hour
-const mask_minute = Smalltime(0x3f) << bitshift_minute
-const mask_second = Smalltime(0x3f) << bitshift_second
-const mask_microsecond = Smalltime(0xfffff)
+const maskYear = uint64(0x3ffff) << bitshiftYear
+const maskMonth = Smalltime(0xf) << bitshiftMonth
+const maskDay = Smalltime(0x1f) << bitshiftDay
+const maskHour = Smalltime(0x1f) << bitshiftHour
+const maskMinute = Smalltime(0x3f) << bitshiftMinute
+const maskSecond = Smalltime(0x3f) << bitshiftSecond
+const maskMicrosecond = Smalltime(0xfffff)
 
-func is_leap_year(year int) bool {
+func isLeapYear(year int) bool {
 	return year%4 == 0 && (year%100 != 0 || year%400 == 0)
 }
 
-func ymd_to_doy(year, month, day int) (doy int) {
-	months_from_march := (month + 9) % 12       // [0, 11]
-	doy = (153*months_from_march+2)/5 + day - 1 // [0, 365]
-	if is_leap_year(year) {
+func ymdToDoy(year, month, day int) (doy int) {
+	monthsFromMarch := (month + 9) % 12       // [0, 11]
+	doy = (153*monthsFromMarch+2)/5 + day - 1 // [0, 365]
+	if isLeapYear(year) {
 		doy = (doy + 60) % 366
 	} else {
 		doy = (doy + 59) % 365
@@ -54,15 +54,15 @@ func ymd_to_doy(year, month, day int) (doy int) {
 	return doy // [1, 366]
 }
 
-func doy_to_ymd(year, doy int) (month, day int) {
-	if is_leap_year(year) {
+func doyToYmd(year, doy int) (month, day int) {
+	if isLeapYear(year) {
 		doy = (doy + 305) % 366
 	} else {
 		doy = (doy + 305) % 365
 	}
-	months_from_march := (5*doy + 2) / 153      // [0, 11]
-	day = doy - (153*months_from_march+2)/5 + 1 // [1, 31]
-	month = (months_from_march+2)%12 + 1        // [1, 12]
+	monthsFromMarch := (5*doy + 2) / 153      // [0, 11]
+	day = doy - (153*monthsFromMarch+2)/5 + 1 // [1, 31]
+	month = (monthsFromMarch+2)%12 + 1        // [1, 12]
 	return month, day
 }
 
@@ -72,17 +72,17 @@ func FromTime(t time.Time) Smalltime {
 }
 
 func New(year, month, day, hour, minute, second, microsecond int) Smalltime {
-	return Smalltime(year)<<bitshift_year |
-		Smalltime(month)<<bitshift_month |
-		Smalltime(day)<<bitshift_day |
-		Smalltime(hour)<<bitshift_hour |
-		Smalltime(minute)<<bitshift_minute |
-		Smalltime(second)<<bitshift_second |
+	return Smalltime(year)<<bitshiftYear |
+		Smalltime(month)<<bitshiftMonth |
+		Smalltime(day)<<bitshiftDay |
+		Smalltime(hour)<<bitshiftHour |
+		Smalltime(minute)<<bitshiftMinute |
+		Smalltime(second)<<bitshiftSecond |
 		Smalltime(microsecond)
 }
 
-func NewWithDoy(year, day_of_year, hour, minute, second, microsecond int) Smalltime {
-	month, day := doy_to_ymd(year, day_of_year)
+func NewWithDoy(year, dayOfYear, hour, minute, second, microsecond int) Smalltime {
+	month, day := doyToYmd(year, dayOfYear)
 	return New(year, month, day, hour, minute, second, microsecond)
 }
 
@@ -96,33 +96,33 @@ func (t Smalltime) AsTimeInLocation(loc *time.Location) time.Time {
 }
 
 func (time Smalltime) Year() int {
-	return int(time >> bitshift_year)
+	return int(time >> bitshiftYear)
 }
 
 func (time Smalltime) Doy() int {
-	return ymd_to_doy(time.Year(), time.Month(), time.Day())
+	return ymdToDoy(time.Year(), time.Month(), time.Day())
 }
 
 func (time Smalltime) Month() int {
-	return int((time & mask_month) >> bitshift_month)
+	return int((time & maskMonth) >> bitshiftMonth)
 }
 
 func (time Smalltime) Day() int {
-	return int((time & mask_day) >> bitshift_day)
+	return int((time & maskDay) >> bitshiftDay)
 }
 
 func (time Smalltime) Hour() int {
-	return int((time & mask_hour) >> bitshift_hour)
+	return int((time & maskHour) >> bitshiftHour)
 }
 
 func (time Smalltime) Minute() int {
-	return int((time & mask_minute) >> bitshift_minute)
+	return int((time & maskMinute) >> bitshiftMinute)
 }
 
 func (time Smalltime) Second() int {
-	return int((time & mask_second) >> bitshift_second)
+	return int((time & maskSecond) >> bitshiftSecond)
 }
 
 func (time Smalltime) Microsecond() int {
-	return int(time & mask_microsecond)
+	return int(time & maskMicrosecond)
 }
