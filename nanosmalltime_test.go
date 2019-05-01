@@ -49,9 +49,9 @@ func assertYmdToDoy(t *testing.T, year, month, day, doy int) {
 	}
 }
 
-func assertTimeEquivalence(t *testing.T, year, month, day, hour, minute, second, usec int) {
-	smtime := New(year, month, day, hour, minute, second, usec)
-	gotime := time.Date(year, time.Month(month), day, hour, minute, second, usec*1000, time.UTC)
+func assertTimeEquivalence(t *testing.T, year, month, day, hour, minute, second, nsec int) {
+	smtime := NanoNew(year, month, day, hour, minute, second, nsec)
+	gotime := time.Date(year, time.Month(month), day, hour, minute, second, nsec, time.UTC)
 
 	if smtime.Year() != gotime.Year() ||
 		smtime.Month() != int(gotime.Month()) ||
@@ -59,32 +59,32 @@ func assertTimeEquivalence(t *testing.T, year, month, day, hour, minute, second,
 		smtime.Hour() != gotime.Hour() ||
 		smtime.Minute() != gotime.Minute() ||
 		smtime.Second() != gotime.Second() ||
-		smtime.Microsecond() != gotime.Nanosecond()/1000 {
+		smtime.Nanosecond() != gotime.Nanosecond() {
 		t.Errorf("%04d-%02d-%02dT%02d:%02d:%02d.%06d != %v",
 			smtime.Year(), smtime.Month(), smtime.Day(), smtime.Hour(),
-			smtime.Minute(), smtime.Second(), smtime.Microsecond(), gotime)
+			smtime.Minute(), smtime.Second(), smtime.Nanosecond(), gotime)
 	}
 
 	if smtime.AsTime() != gotime {
 		t.Errorf("%04d-%02d-%02dT%02d:%02d:%02d.%06d did not convert cleanly to %v",
 			smtime.Year(), smtime.Month(), smtime.Day(), smtime.Hour(),
-			smtime.Minute(), smtime.Second(), smtime.Microsecond(), gotime)
+			smtime.Minute(), smtime.Second(), smtime.Nanosecond(), gotime)
 	}
 
 	if FromTime(gotime) != smtime {
 		t.Errorf("%v did not convert cleanly to %04d-%02d-%02dT%02d:%02d:%02d.%06d",
 			gotime, smtime.Year(), smtime.Month(), smtime.Day(), smtime.Hour(),
-			smtime.Minute(), smtime.Second(), smtime.Microsecond())
+			smtime.Minute(), smtime.Second(), smtime.Nanosecond())
 	}
 }
 
-func assertGreater(t *testing.T, greater, smaller Smalltime) {
+func assertGreater(t *testing.T, greater, smaller NanoSmalltime) {
 	if greater <= smaller {
 		t.Errorf("%04d-%02d-%02dT%02d:%02d:%02d.%06d is not smaller than %04d-%02d-%02dT%02d:%02d:%02d.%06d",
 			greater.Year(), greater.Month(), greater.Day(), greater.Hour(),
-			greater.Minute(), greater.Second(), greater.Microsecond(),
+			greater.Minute(), greater.Second(), greater.Nanosecond(),
 			smaller.Year(), smaller.Month(), smaller.Day(), smaller.Hour(),
-			smaller.Minute(), smaller.Second(), smaller.Microsecond())
+			smaller.Minute(), smaller.Second(), smaller.Nanosecond())
 	}
 }
 
@@ -115,15 +115,15 @@ func Test409Years(t *testing.T) {
 	}
 }
 
-func TestMicroseconds(t *testing.T) {
+func TestNanoseconds(t *testing.T) {
 	year := 2003
 	month := 11
 	day := 15
 	hour := 8
 	minute := 30
 	second := 55
-	for microsecond := 0; microsecond < 1000000; microsecond++ {
-		assertTimeEquivalence(t, year, month, day, hour, minute, second, microsecond)
+	for nanosecond := 0; nanosecond < 1000000000; nanosecond++ {
+		assertTimeEquivalence(t, year, month, day, hour, minute, second, nanosecond)
 	}
 }
 
@@ -133,9 +133,9 @@ func TestSeconds(t *testing.T) {
 	day := 15
 	hour := 8
 	minute := 30
-	microsecond := 1402
+	nanosecond := 1402778
 	for second := 0; second < 60; second++ {
-		assertTimeEquivalence(t, year, month, day, hour, minute, second, microsecond)
+		assertTimeEquivalence(t, year, month, day, hour, minute, second, nanosecond)
 	}
 }
 
@@ -145,9 +145,9 @@ func TestMinutes(t *testing.T) {
 	day := 15
 	hour := 8
 	second := 30
-	microsecond := 1402
+	nanosecond := 1402991
 	for minute := 0; minute < 60; minute++ {
-		assertTimeEquivalence(t, year, month, day, hour, minute, second, microsecond)
+		assertTimeEquivalence(t, year, month, day, hour, minute, second, nanosecond)
 	}
 }
 
@@ -157,9 +157,9 @@ func TestHours(t *testing.T) {
 	day := 15
 	minute := 30
 	second := 55
-	microsecond := 1402
+	nanosecond := 1402889
 	for hour := 0; hour < 24; hour++ {
-		assertTimeEquivalence(t, year, month, day, hour, minute, second, microsecond)
+		assertTimeEquivalence(t, year, month, day, hour, minute, second, nanosecond)
 	}
 }
 
@@ -169,13 +169,13 @@ func TestDays(t *testing.T) {
 	hour := 8
 	minute := 30
 	second := 55
-	microsecond := 1402
+	nanosecond := 1402345
 	for day := 1; day < 30; day++ {
-		assertTimeEquivalence(t, year, month, day, hour, minute, second, microsecond)
+		assertTimeEquivalence(t, year, month, day, hour, minute, second, nanosecond)
 	}
 	year = 2004
 	for day := 1; day < 30; day++ {
-		assertTimeEquivalence(t, year, month, day, hour, minute, second, microsecond)
+		assertTimeEquivalence(t, year, month, day, hour, minute, second, nanosecond)
 	}
 }
 
@@ -185,13 +185,13 @@ func TestMonths(t *testing.T) {
 	hour := 8
 	minute := 30
 	second := 55
-	microsecond := 1402
+	nanosecond := 1402988
 	for month := 1; month < 12; month++ {
-		assertTimeEquivalence(t, year, month, day, hour, minute, second, microsecond)
+		assertTimeEquivalence(t, year, month, day, hour, minute, second, nanosecond)
 	}
 	year = 2004
 	for month := 1; month < 12; month++ {
-		assertTimeEquivalence(t, year, month, day, hour, minute, second, microsecond)
+		assertTimeEquivalence(t, year, month, day, hour, minute, second, nanosecond)
 	}
 }
 
@@ -201,10 +201,10 @@ func TestYears(t *testing.T) {
 	hour := 8
 	minute := 15
 	second := 30
-	microsecond := 1402
+	nanosecond := 1402567
 
 	for year := -131072; year < 131071; year++ {
-		assertTimeEquivalence(t, year, month, day, hour, minute, second, microsecond)
+		assertTimeEquivalence(t, year, month, day, hour, minute, second, nanosecond)
 	}
 }
 
@@ -293,27 +293,27 @@ func TestDoyToYmd(t *testing.T) {
 }
 
 func TestComparisons(t *testing.T) {
-	assertGreater(t, New(2000, 1, 1, 0, 0, 0, 1), New(2000, 1, 1, 0, 0, 0, 0))
-	assertGreater(t, New(2000, 1, 1, 0, 0, 1, 0), New(2000, 1, 1, 0, 0, 0, 999999))
-	assertGreater(t, New(2000, 1, 1, 0, 0, 2, 0), New(2000, 1, 1, 0, 0, 1, 0))
-	assertGreater(t, New(2000, 1, 1, 0, 1, 0, 0), New(2000, 1, 1, 0, 0, 60, 0))
-	assertGreater(t, New(2000, 1, 1, 0, 2, 0, 0), New(2000, 1, 1, 0, 1, 0, 0))
-	assertGreater(t, New(2000, 1, 1, 1, 0, 0, 0), New(2000, 1, 1, 0, 59, 0, 0))
-	assertGreater(t, New(2000, 1, 1, 2, 0, 0, 0), New(2000, 1, 1, 1, 0, 0, 0))
-	assertGreater(t, New(2000, 1, 2, 0, 0, 0, 0), New(2000, 1, 1, 23, 0, 0, 0))
-	assertGreater(t, New(2000, 1, 2, 0, 0, 0, 0), New(2000, 1, 1, 0, 0, 0, 0))
-	assertGreater(t, New(2005, 1, 1, 0, 0, 0, 0), New(2004, 12, 31, 0, 0, 0, 0))
-	assertGreater(t, New(1, 1, 1, 0, 0, 0, 0), New(0, 1, 1, 0, 0, 0, 0))
-	assertGreater(t, New(0, 1, 1, 0, 0, 0, 0), New(-1, 1, 1, 0, 0, 0, 0))
-	assertGreater(t, New(1, 1, 1, 0, 0, 0, 0), New(-1, 1, 1, 0, 0, 0, 0))
+	assertGreater(t, NanoNew(2000, 1, 1, 0, 0, 0, 1), NanoNew(2000, 1, 1, 0, 0, 0, 0))
+	assertGreater(t, NanoNew(2000, 1, 1, 0, 0, 1, 0), NanoNew(2000, 1, 1, 0, 0, 0, 999999))
+	assertGreater(t, NanoNew(2000, 1, 1, 0, 0, 2, 0), NanoNew(2000, 1, 1, 0, 0, 1, 0))
+	assertGreater(t, NanoNew(2000, 1, 1, 0, 1, 0, 0), NanoNew(2000, 1, 1, 0, 0, 60, 0))
+	assertGreater(t, NanoNew(2000, 1, 1, 0, 2, 0, 0), NanoNew(2000, 1, 1, 0, 1, 0, 0))
+	assertGreater(t, NanoNew(2000, 1, 1, 1, 0, 0, 0), NanoNew(2000, 1, 1, 0, 59, 0, 0))
+	assertGreater(t, NanoNew(2000, 1, 1, 2, 0, 0, 0), NanoNew(2000, 1, 1, 1, 0, 0, 0))
+	assertGreater(t, NanoNew(2000, 1, 2, 0, 0, 0, 0), NanoNew(2000, 1, 1, 23, 0, 0, 0))
+	assertGreater(t, NanoNew(2000, 1, 2, 0, 0, 0, 0), NanoNew(2000, 1, 1, 0, 0, 0, 0))
+	assertGreater(t, NanoNew(2005, 1, 1, 0, 0, 0, 0), NanoNew(2004, 12, 31, 0, 0, 0, 0))
+	assertGreater(t, NanoNew(1, 1, 1, 0, 0, 0, 0), NanoNew(0, 1, 1, 0, 0, 0, 0))
+	assertGreater(t, NanoNew(0, 1, 1, 0, 0, 0, 0), NanoNew(-1, 1, 1, 0, 0, 0, 0))
+	assertGreater(t, NanoNew(1, 1, 1, 0, 0, 0, 0), NanoNew(-1, 1, 1, 0, 0, 0, 0))
 }
 
 func TestSpecExamples(t *testing.T) {
-	assertDecode(t, Smalltime(0x1f06b48590dbc2e), 1985, 10, 26, 8, 22, 16, 900142)
-	assertDecode(t, Smalltime(0x1f06b68590dbc2e), 1985, 10, 27, 8, 22, 16, 900142)
-	assertDecode(t, Smalltime(0x1f06b48550dbc2e), 1985, 10, 26, 8, 21, 16, 900142)
+	assertDecode(t, NanoSmalltime(0x1f06b48590dbc2e), 1985, 10, 26, 8, 22, 16, 900142)
+	assertDecode(t, NanoSmalltime(0x1f06b68590dbc2e), 1985, 10, 27, 8, 22, 16, 900142)
+	assertDecode(t, NanoSmalltime(0x1f06b48550dbc2e), 1985, 10, 26, 8, 21, 16, 900142)
 
-	assertEncode(t, 1985, 10, 26, 8, 22, 16, 900142, Smalltime(0x1f06b48590dbc2e))
-	assertEncode(t, 1985, 10, 27, 8, 22, 16, 900142, Smalltime(0x1f06b68590dbc2e))
-	assertEncode(t, 1985, 10, 26, 8, 21, 16, 900142, Smalltime(0x1f06b48550dbc2e))
+	assertEncode(t, 1985, 10, 26, 8, 22, 16, 900142, NanoSmalltime(0x1f06b48590dbc2e))
+	assertEncode(t, 1985, 10, 27, 8, 22, 16, 900142, NanoSmalltime(0x1f06b68590dbc2e))
+	assertEncode(t, 1985, 10, 26, 8, 21, 16, 900142, NanoSmalltime(0x1f06b48550dbc2e))
 }
