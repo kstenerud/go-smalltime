@@ -32,6 +32,7 @@ const bitshiftMinute = 26
 const bitshiftSecond = 20
 
 const nanoextraShift = 3
+const nanoYearStart = 1900 // Better suggestions?
 
 const maskYear = uint64(0x3ffff) << bitshiftYear
 const maskMonth = Smalltime(0xf) << bitshiftMonth
@@ -83,7 +84,7 @@ func FromTime(t time.Time) Smalltime {
 }
 
 func FromTime(t time.Time) NanoSmalltime {
-	return New(t.Year(), int(t.Month()), t.Day(), t.Hour(),
+	return NanoNew(t.Year(), int(t.Month()), t.Day(), t.Hour(),
 		t.Minute(), t.Second(), t.Nanosecond())
 }
 
@@ -98,7 +99,7 @@ func New(year, month, day, hour, minute, second, microsecond int) Smalltime {
 }
 
 func NanoNew(year, month, day, hour, minute, second, nanosecond int) NanoSmalltime {
-	return NanoSmalltime(year)<<(bitshiftYear + nanoextraShift) |
+	return NanoSmalltime(year-nanoYearStart)<<(bitshiftYear + nanoextraShift) |
 		NanoSmalltime(month)<<(bitshiftMonth + nanoextraShift) |
 		NanoSmalltime(day)<<(bitshiftDay + nanoextraShift) |
 		NanoSmalltime(hour)<<(bitshiftHour + nanoextraShift) |
@@ -140,7 +141,7 @@ func (time Smalltime) Year() int {
 }
 
 func (time NanoSmalltime) Year() int {
-	return int(time >> (bitshiftYear + nanoextraShift))
+	return int(time >> (bitshiftYear + nanoextraShift)+nanoYearStart)
 }
 
 func (time Smalltime) Doy() int {
