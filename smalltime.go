@@ -31,8 +31,9 @@ const bitshiftHour = 32
 const bitshiftMinute = 26
 const bitshiftSecond = 20
 
-const nanoextraShift = 3
-const nanoYearStart = 1900 // Better suggestions?
+const nanoextraShift = 10
+const nanoyearStart = 1900 // Better suggestions?
+var nanoyearBits = uint(64-bitshiftYear-nanoextraShift)
 
 const maskYear = uint64(0x3ffff) << bitshiftYear
 const maskMonth = Smalltime(0xf) << bitshiftMonth
@@ -83,7 +84,7 @@ func FromTime(t time.Time) Smalltime {
 		t.Minute(), t.Second(), t.Nanosecond()/1000)
 }
 
-func FromTime(t time.Time) NanoSmalltime {
+func NanoFromTime(t time.Time) NanoSmalltime {
 	return NanoNew(t.Year(), int(t.Month()), t.Day(), t.Hour(),
 		t.Minute(), t.Second(), t.Nanosecond())
 }
@@ -99,7 +100,7 @@ func New(year, month, day, hour, minute, second, microsecond int) Smalltime {
 }
 
 func NanoNew(year, month, day, hour, minute, second, nanosecond int) NanoSmalltime {
-	return NanoSmalltime(year-nanoYearStart)<<(bitshiftYear + nanoextraShift) |
+	return NanoSmalltime(year-nanoyearStart)<<(bitshiftYear + nanoextraShift) |
 		NanoSmalltime(month)<<(bitshiftMonth + nanoextraShift) |
 		NanoSmalltime(day)<<(bitshiftDay + nanoextraShift) |
 		NanoSmalltime(hour)<<(bitshiftHour + nanoextraShift) |
@@ -115,7 +116,7 @@ func NewWithDoy(year, dayOfYear, hour, minute, second, microsecond int) Smalltim
 
 func NanoNewWithDoy(year, dayOfYear, hour, minute, second, nanosecond int) NanoSmalltime {
 	month, day := doyToYmd(year, dayOfYear)
-	return New(year, month, day, hour, minute, second, nanosecond)
+	return NanoNew(year, month, day, hour, minute, second, nanosecond)
 }
 
 func (t Smalltime) AsTime() time.Time {
@@ -141,7 +142,11 @@ func (time Smalltime) Year() int {
 }
 
 func (time NanoSmalltime) Year() int {
-	return int(time >> (bitshiftYear + nanoextraShift)+nanoYearStart)
+	y:=int(time >> (bitshiftYear + nanoextraShift)+nanoyearStart)
+	if y<nanoyearStart {
+		y+=1<<nanoyearBits
+	}
+	return y
 }
 
 func (time Smalltime) Doy() int {
@@ -157,7 +162,7 @@ func (time Smalltime) Month() int {
 }
 
 func (time NanoSmalltime) Month() int {
-	return int((time & nanomaskMonth) >> bitshiftMonth + nanoextraShift))
+	return int((time & nanomaskMonth) >> (bitshiftMonth + nanoextraShift))
 }
 
 func (time Smalltime) Day() int {
@@ -165,7 +170,7 @@ func (time Smalltime) Day() int {
 }
 
 func (time NanoSmalltime) Day() int {
-	return int((time & nanomaskDay) >> bitshiftDay + nanoextraShift))
+	return int((time & nanomaskDay) >> (bitshiftDay + nanoextraShift))
 }
 
 func (time Smalltime) Hour() int {
@@ -173,7 +178,7 @@ func (time Smalltime) Hour() int {
 }
 
 func (time NanoSmalltime) Hour() int {
-	return int((time & nanomaskHour) >> bitshiftHour + nanoextraShift)
+	return int((time & nanomaskHour) >> (bitshiftHour + nanoextraShift))
 }
 
 func (time Smalltime) Minute() int {
@@ -181,7 +186,7 @@ func (time Smalltime) Minute() int {
 }
 
 func (time NanoSmalltime) Minute() int {
-	return int((time & nanomaskMinute) >> bitshiftMinute + nanoextraShift)
+	return int((time & nanomaskMinute) >> (bitshiftMinute + nanoextraShift))
 }
 
 func (time Smalltime) Second() int {
@@ -189,7 +194,7 @@ func (time Smalltime) Second() int {
 }
 
 func (time NanoSmalltime) Second() int {
-	return int((time & nanomaskSecond) >> bitshiftSecond + nanoextraShift)
+	return int((time & nanomaskSecond) >> (bitshiftSecond + nanoextraShift))
 }
 
 func (time Smalltime) Microsecond() int {
