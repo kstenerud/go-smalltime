@@ -47,7 +47,7 @@ func nanoassertYmdToDoy(t *testing.T, year, month, day, doy int) {
 
 func nanoassertTimeEquivalence(t *testing.T, year, month, day, hour, minute, second, nsec int) {
  //       fmt.Println(year, month, day, hour, minute, second, nsec)
-	smtime := WrapNanoNew(year, month, day, hour, minute, second, nsec)
+	smtime := NanoNew(year, month, day, hour, minute, second, nsec)
 	gotime := time.Date(year, time.Month(month), day, hour, minute, second, nsec, time.UTC)
 
 	if smtime.Year() != gotime.Year() ||
