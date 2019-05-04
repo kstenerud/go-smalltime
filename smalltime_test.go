@@ -9,7 +9,7 @@ func workaroundUnusedImportErrorFmt() {
 }
 
 func assertEncodeDecode(t *testing.T, year, month, day, hour, minute, second, usec int) {
-	time := New(year, month, day, hour, minute, second, usec)
+	time := NewSmalltime(year, month, day, hour, minute, second, usec)
 	if time.Year() != year || time.Month() != month || time.Day() != day ||
 		time.Minute() != minute || time.Second() != second || time.Microsecond() != usec {
 		t.Errorf("Expected: %04d-%02d-%02dT%02d:%02d:%02d.%06d, Actual: %04d-%02d-%02dT%02d:%02d:%02d.%06d (doy %d)",
@@ -19,7 +19,7 @@ func assertEncodeDecode(t *testing.T, year, month, day, hour, minute, second, us
 }
 
 func assertEncode(t *testing.T, year, month, day, hour, minute, second, usec int, encoded Smalltime) {
-	time := New(year, month, day, hour, minute, second, usec)
+	time := NewSmalltime(year, month, day, hour, minute, second, usec)
 	if time != encoded {
 		t.Errorf("Expected %04d-%02d-%02dT%02d:%02d:%02d.%06d to encode to %016x. Actual: %016x",
 			year, month, day, hour, minute, second, usec, encoded, time)
@@ -50,7 +50,7 @@ func assertYmdToDoy(t *testing.T, year, month, day, doy int) {
 }
 
 func assertTimeEquivalence(t *testing.T, year, month, day, hour, minute, second, usec int) {
-	smtime := New(year, month, day, hour, minute, second, usec)
+	smtime := NewSmalltime(year, month, day, hour, minute, second, usec)
 	gotime := time.Date(year, time.Month(month), day, hour, minute, second, usec*1000, time.UTC)
 
 	if smtime.Year() != gotime.Year() ||
@@ -71,7 +71,7 @@ func assertTimeEquivalence(t *testing.T, year, month, day, hour, minute, second,
 			smtime.Minute(), smtime.Second(), smtime.Microsecond(), gotime)
 	}
 
-	if FromTime(gotime) != smtime {
+	if SmalltimeFromTime(gotime) != smtime {
 		t.Errorf("%v did not convert cleanly to %04d-%02d-%02dT%02d:%02d:%02d.%06d",
 			gotime, smtime.Year(), smtime.Month(), smtime.Day(), smtime.Hour(),
 			smtime.Minute(), smtime.Second(), smtime.Microsecond())
@@ -293,19 +293,19 @@ func TestDoyToYmd(t *testing.T) {
 }
 
 func TestComparisons(t *testing.T) {
-	assertGreater(t, New(2000, 1, 1, 0, 0, 0, 1), New(2000, 1, 1, 0, 0, 0, 0))
-	assertGreater(t, New(2000, 1, 1, 0, 0, 1, 0), New(2000, 1, 1, 0, 0, 0, 999999))
-	assertGreater(t, New(2000, 1, 1, 0, 0, 2, 0), New(2000, 1, 1, 0, 0, 1, 0))
-	assertGreater(t, New(2000, 1, 1, 0, 1, 0, 0), New(2000, 1, 1, 0, 0, 60, 0))
-	assertGreater(t, New(2000, 1, 1, 0, 2, 0, 0), New(2000, 1, 1, 0, 1, 0, 0))
-	assertGreater(t, New(2000, 1, 1, 1, 0, 0, 0), New(2000, 1, 1, 0, 59, 0, 0))
-	assertGreater(t, New(2000, 1, 1, 2, 0, 0, 0), New(2000, 1, 1, 1, 0, 0, 0))
-	assertGreater(t, New(2000, 1, 2, 0, 0, 0, 0), New(2000, 1, 1, 23, 0, 0, 0))
-	assertGreater(t, New(2000, 1, 2, 0, 0, 0, 0), New(2000, 1, 1, 0, 0, 0, 0))
-	assertGreater(t, New(2005, 1, 1, 0, 0, 0, 0), New(2004, 12, 31, 0, 0, 0, 0))
-	assertGreater(t, New(1, 1, 1, 0, 0, 0, 0), New(0, 1, 1, 0, 0, 0, 0))
-	assertGreater(t, New(0, 1, 1, 0, 0, 0, 0), New(-1, 1, 1, 0, 0, 0, 0))
-	assertGreater(t, New(1, 1, 1, 0, 0, 0, 0), New(-1, 1, 1, 0, 0, 0, 0))
+	assertGreater(t, NewSmalltime(2000, 1, 1, 0, 0, 0, 1), NewSmalltime(2000, 1, 1, 0, 0, 0, 0))
+	assertGreater(t, NewSmalltime(2000, 1, 1, 0, 0, 1, 0), NewSmalltime(2000, 1, 1, 0, 0, 0, 999999))
+	assertGreater(t, NewSmalltime(2000, 1, 1, 0, 0, 2, 0), NewSmalltime(2000, 1, 1, 0, 0, 1, 0))
+	assertGreater(t, NewSmalltime(2000, 1, 1, 0, 1, 0, 0), NewSmalltime(2000, 1, 1, 0, 0, 60, 0))
+	assertGreater(t, NewSmalltime(2000, 1, 1, 0, 2, 0, 0), NewSmalltime(2000, 1, 1, 0, 1, 0, 0))
+	assertGreater(t, NewSmalltime(2000, 1, 1, 1, 0, 0, 0), NewSmalltime(2000, 1, 1, 0, 59, 0, 0))
+	assertGreater(t, NewSmalltime(2000, 1, 1, 2, 0, 0, 0), NewSmalltime(2000, 1, 1, 1, 0, 0, 0))
+	assertGreater(t, NewSmalltime(2000, 1, 2, 0, 0, 0, 0), NewSmalltime(2000, 1, 1, 23, 0, 0, 0))
+	assertGreater(t, NewSmalltime(2000, 1, 2, 0, 0, 0, 0), NewSmalltime(2000, 1, 1, 0, 0, 0, 0))
+	assertGreater(t, NewSmalltime(2005, 1, 1, 0, 0, 0, 0), NewSmalltime(2004, 12, 31, 0, 0, 0, 0))
+	assertGreater(t, NewSmalltime(1, 1, 1, 0, 0, 0, 0), NewSmalltime(0, 1, 1, 0, 0, 0, 0))
+	assertGreater(t, NewSmalltime(0, 1, 1, 0, 0, 0, 0), NewSmalltime(-1, 1, 1, 0, 0, 0, 0))
+	assertGreater(t, NewSmalltime(1, 1, 1, 0, 0, 0, 0), NewSmalltime(-1, 1, 1, 0, 0, 0, 0))
 }
 
 func TestSpecExamples(t *testing.T) {
