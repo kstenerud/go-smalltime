@@ -20,6 +20,7 @@ const maskSecond = Smalltime(0x3f) << bitshiftSecond
 const maskMicrosecond = Smalltime(0xfffff)
 
 func SmalltimeFromTime(t time.Time) Smalltime {
+	t = t.UTC()
 	return NewSmalltime(t.Year(), int(t.Month()), t.Day(), t.Hour(),
 		t.Minute(), t.Second(), t.Nanosecond()/1000)
 }

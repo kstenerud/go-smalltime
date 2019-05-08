@@ -22,6 +22,7 @@ const maskSecondNanotime = Nanotime(0x3f) << (bitshiftSecondNanotime)
 const maskNanoNanotime = Nanotime(0x3fffffff)
 
 func NanotimeFromTime(t time.Time) Nanotime {
+	t = t.UTC()
 	return NewNanotime(t.Year(), int(t.Month()), t.Day(), t.Hour(),
 		t.Minute(), t.Second(), t.Nanosecond())
 }
